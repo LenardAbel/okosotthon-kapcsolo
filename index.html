@@ -27,38 +27,35 @@
 </div>
 
 <script>
-    // --- IDE ÍRD AZ ADATAIDAT ---
-    const brokerUrl = 'wss://e145f29913884d19aa18d2082941f151.s1.eu.hivemq.cloud:8884/mqtt'; 
-    const options = {
-        username: 'mqttvok', // A webes felhasználód
-        password: 'HiHeHa2121.'
-    };
-    const topic = 'otthon/nappali/konnektor/set';
-    // ----------------------------
+    // 1. Megkérdezzük a jelszót a felhasználótól
+    const userPass = prompt("Add meg a vezérlő jelszót:");
 
-    const statusDiv = document.getElementById('status');
-    const client = mqtt.connect(brokerUrl, options);
+    if (userPass) {
+        const broker = 'wss://e145f29913884d19aa18d2082941f151.s1.eu.hivemq.cloud:8884/mqtt'; 
+        const options = {
+            username: 'mqttvok', 
+            password: userPass // A beírt jelszót használjuk
+        };
 
-    client.on('connect', () => {
-        statusDiv.innerText = "ONLINE - Csatlakoztatva a HiveMQ-hoz";
-        statusDiv.className = "online";
-        console.log("Sikeres csatlakozás!");
-    });
+        const client = mqtt.connect(broker, options);
 
-    client.on('error', (err) => {
-        statusDiv.innerText = "HIBA: " + err.message;
-        statusDiv.className = "offline";
-    });
+        client.on('connect', () => {
+            console.log("Sikeresen csatlakozva!");
+            document.body.style.backgroundColor = "#e7ffe7"; // Zöldes háttér, ha oké
+        });
 
-    function sendMsg(payload) {
-        if (client.connected) {
-            client.publish(topic, payload, { qos: 1 });
-            console.log("Üzenet elküldve: " + payload);
-        } else {
-            alert("Nincs kapcsolat a brokerrel!");
+        client.on('error', (err) => {
+            alert("Hiba a csatlakozásnál! Rossz jelszó?");
+        });
+
+        function send(val) {
+            client.publish('otthon/nappali/konnektor/set', val, { qos: 1 });
         }
+    } else {
+        alert("Jelszó nélkül nem tudsz csatlakozni.");
     }
 </script>
+
 
 </body>
 </html>

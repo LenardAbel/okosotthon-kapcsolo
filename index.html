@@ -27,34 +27,45 @@
 </div>
 
 <script>
-    // 1. Megkérdezzük a jelszót a felhasználótól
+    // 1. Deklaráljuk a változót kívül, hogy a gombok is lássák
+    let client;
+
     const userPass = prompt("Add meg a vezérlő jelszót:");
 
     if (userPass) {
         const broker = 'wss://e145f29913884d19aa18d2082941f151.s1.eu.hivemq.cloud:8884/mqtt'; 
         const options = {
             username: 'mqttvok', 
-            password: userPass // A beírt jelszót használjuk
+            password: userPass
         };
 
-        const client = mqtt.connect(broker, options);
+        // Itt hozzuk létre a kapcsolatot
+        client = mqtt.connect(broker, options);
 
         client.on('connect', () => {
             console.log("Sikeresen csatlakozva!");
-            document.body.style.backgroundColor = "#e7ffe7"; // Zöldes háttér, ha oké
+            const s = document.getElementById('status');
+            s.innerText = "ONLINE - Vezérlés kész";
+            s.className = "online"; // Átvált zöldre a csík
+            document.body.style.backgroundColor = "#1b1b1b"; 
         });
 
         client.on('error', (err) => {
             alert("Hiba a csatlakozásnál! Rossz jelszó?");
         });
+    }
 
-        function send(val) {
+    // A függvény neve legyen ugyanaz, mint a gomboknál (sendMsg)
+    function sendMsg(val) {
+        if (client && client.connected) {
             client.publish('otthon/nappali/konnektor/set', val, { qos: 1 });
+            console.log("Küldve: " + val);
+        } else {
+            alert("Várj, még nincs kapcsolat a felhővel!");
         }
-    } else {
-        alert("Jelszó nélkül nem tudsz csatlakozni.");
     }
 </script>
+
 
 
 </body>
